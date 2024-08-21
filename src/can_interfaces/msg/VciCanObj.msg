@@ -1,0 +1,9 @@
+uint32 id
+uint32 time_stamp
+uint8 time_flag
+uint8 send_type
+uint8 remote_flag
+uint8 extern_flag
+uint8 data_len
+uint8[8] data
+uint8[3] reserved

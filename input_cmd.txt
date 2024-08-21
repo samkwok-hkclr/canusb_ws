@@ -1,0 +1,67 @@
+# reset
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x0, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 2, \
+data:[0x81, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# set 1000ms heartbeat
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x0, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 2, \
+data:[0x81, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# velocity control
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2F, 0x60, 0x60, 0x0, 0x03, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0xFF, 0x60, 0x0, 0x0, 0x40, 0x06, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2B, 0x40, 0x60, 0x0, 0x0F, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"

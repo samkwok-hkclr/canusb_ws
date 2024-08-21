@@ -1,0 +1,1 @@
+docker build --tag my_sys:v0 --target=kinco_prod_img --progress=plain .
