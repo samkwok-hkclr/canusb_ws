@@ -68,7 +68,7 @@ bool CanTransceiver::find_canusb()
 
 		RCLCPP_INFO(this->get_logger(), "Firmware Version: V%x.%x%x",
                                         (pInfo1[i].fw_Version & 0xF00) >> 8,
-                                        (pInfo1[i].fw_Version & 0xF0) >> 4,
+                                        (pInfo1[i].fw_Version & 0xF0)  >> 4,
                                         (pInfo1[i].fw_Version & 0xF));
 	}
 
@@ -101,7 +101,7 @@ bool CanTransceiver::read_canusb()
 
 		RCLCPP_INFO(this->get_logger(), "Firmware Version: V%x.%x%x",
                                         (pInfo.fw_Version & 0xF00) >> 8,
-                                        (pInfo.fw_Version & 0xF0)>>4,
+                                        (pInfo.fw_Version & 0xF0)  >> 4,
                                         (pInfo.fw_Version & 0xF));
 	}
     else
@@ -112,14 +112,14 @@ bool CanTransceiver::read_canusb()
     return true;
 }
 
-bool CanTransceiver::init_canusb(const std::string filename)
+bool CanTransceiver::init_canusb(const std::string config_filename)
 {
     std::string share_directory, config_file;
     try 
     {
         share_directory = ament_index_cpp::get_package_share_directory("can_transceiver");
-        config_file = share_directory + "/config/" + filename;
-        RCLCPP_INFO(this->get_logger(), config_file.c_str());
+        config_file = share_directory + "/config/" + config_filename;
+        RCLCPP_INFO(this->get_logger(), "CANUSB initialization config file: %s", config_file.c_str());
     } 
     catch (ament_index_cpp::PackageNotFoundError & e) 
     {
@@ -141,10 +141,49 @@ bool CanTransceiver::init_canusb(const std::string filename)
         config.Timing0 = config_yaml["timing0"].as<UCHAR>();
         config.Timing1 = config_yaml["timing1"].as<UCHAR>();
         config.Mode = config_yaml["mode"].as<UCHAR>();
+
+        float baud_rate = 0.0;
+
+        if (config.Timing0 == 0x18 && config.Timing1 == 0x1C) 
+            baud_rate = 20;
+        else if (config.Timing0 == 0x87 && config.Timing1 == 0xFF) 
+            baud_rate = 40;
+        else if (config.Timing0 == 0x09 && config.Timing1 == 0x1C) 
+            baud_rate = 50;
+        else if (config.Timing0 == 0x83 && config.Timing1 == 0xFF) 
+            baud_rate = 80;
+        else if (config.Timing0 == 0x04 && config.Timing1 == 0x1C) 
+            baud_rate = 100;
+        else if (config.Timing0 == 0x03 && config.Timing1 == 0x1C) 
+            baud_rate = 125;
+        else if (config.Timing0 == 0x81 && config.Timing1 == 0xFA) 
+            baud_rate = 200;
+        else if (config.Timing0 == 0x01 && config.Timing1 == 0x1C) 
+            baud_rate = 250;
+        else if (config.Timing0 == 0x80 && config.Timing1 == 0xFA) 
+            baud_rate = 400;
+        else if (config.Timing0 == 0x00 && config.Timing1 == 0x1C) 
+            baud_rate = 500;
+        else if (config.Timing0 == 0x80 && config.Timing1 == 0xB6) 
+            baud_rate = 666;
+        else if (config.Timing0 == 0x00 && config.Timing1 == 0x16) 
+            baud_rate = 800;
+        else if (config.Timing0 == 0x00 && config.Timing1 == 0x14) 
+            baud_rate = 1000;
+        else if (config.Timing0 == 0x09 && config.Timing1 == 0x6F) 
+            baud_rate = 33.33;
+        else if (config.Timing0 == 0x04 && config.Timing1 == 0x6F) 
+            baud_rate = 66.66;
+        else if (config.Timing0 == 0x03 && config.Timing1 == 0x6F) 
+            baud_rate = 83.33;
+        else
+            return false;
+
+        RCLCPP_INFO(this->get_logger(), "Baud rate: %.2f Kbps", baud_rate);
         
         if (VCI_InitCAN(VCI_USBCAN2, 0, 0, &config) == 1)
         {
-            RCLCPP_INFO(this->get_logger(), "Init CAN1 success\n");
+            RCLCPP_INFO(this->get_logger(), "Init CAN1 success");
         }
         else
         {
@@ -167,7 +206,7 @@ bool CanTransceiver::start_canusb()
 {
     if (VCI_StartCAN(VCI_USBCAN2, 0, 0) == 1)
 	{
-        RCLCPP_INFO(this->get_logger(), "Start CAN1 success\n");
+        RCLCPP_INFO(this->get_logger(), "Start CAN1 success");
 	}
     else
     {
@@ -188,10 +227,10 @@ void CanTransceiver::can_msg_cb()
 {
     const std::lock_guard<std::mutex> lock(this->mutex_);
 
-    int rec_len = VCI_Receive(VCI_USBCAN2, 0, can_index, rec, rec_buf_len, 0);
+    unsigned int rec_len = VCI_Receive(VCI_USBCAN2, 0, can_index, rec, rec_buf_len, 0);
     if (rec_len > 0)
     {
-        for(int i = 0; i < rec_len; i++)
+        for(unsigned int i = 0; i < rec_len; i++)
         {
             std::string extend, remote;
             if(rec[i].ExternFlag==0) extend="Standard";
@@ -212,8 +251,8 @@ void CanTransceiver::can_msg_cb()
 
             pub_can_msg_->publish(msg);
 
-            RCLCPP_INFO(this->get_logger(), "Index: %05d CAN%d RX ID:0x%08X %s %s DLC:0x%02X data:0x %s",
-                can_count++, can_index+1, rec[i].ID, extend.c_str(), remote.c_str(), rec[i].DataLen, 
+            RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
+                can_count++, can_index+1, "RX", rec[i].ID, extend.c_str(), remote.c_str(), rec[i].DataLen, 
                 [&]() {
                     std::stringstream ss;
                     for (size_t j = 0; j < rec[i].DataLen; j++) {
@@ -247,8 +286,8 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
         if(msg->remote_flag==0) remote="Data";
         if(msg->remote_flag==1) remote="Remote";
 
-        RCLCPP_INFO(this->get_logger(), "Index: %05d CAN%d TX ID:0x%08X %s %s DLC:0x%02X data:0x %s",
-            can_count++, can_index+1, send[0].ID, extend.c_str(), remote.c_str(), send[0].DataLen, 
+        RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
+            can_count++, can_index+1, "TX", send[0].ID, extend.c_str(), remote.c_str(), send[0].DataLen, 
             [&]() {
                 std::stringstream ss;
                 for (size_t j = 0; j < send[0].DataLen; j++) {

@@ -31,7 +31,7 @@ public:
     bool find_canusb();
     bool open_canusb();
     bool read_canusb();
-    bool init_canusb(const std::string filename);
+    bool init_canusb(const std::string config_filename);
     bool start_canusb();
     bool close_canusb();
 
@@ -39,13 +39,15 @@ public:
     void can_req_cb(const std::shared_ptr<VciCanObjMsg> msg);
 
 private:
-    const int rec_buf_len = 3000;
-    const int can_index = 0;
+    const uint16_t rec_buf_len = 3000;
+    const uint8_t can_index = 0;
     uint16_t can_count = 0;
 
     VCI_BOARD_INFO pInfo1[50];
     VCI_BOARD_INFO pInfo;
     VCI_CAN_OBJ rec[3000];
+
+    const std::string can_msg_format = "Index: %05d CAN%d %s ID:0x%03X %s %s DLC:0x%02X Data:0x %s";
 
     std::mutex mutex_;
 
