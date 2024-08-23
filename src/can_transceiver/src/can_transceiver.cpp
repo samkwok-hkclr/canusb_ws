@@ -52,14 +52,14 @@ bool CanTransceiver::find_canusb()
     int num = 0;
 
     num = VCI_FindUsbDevice2(pInfo1);
-    RCLCPP_INFO(this->get_logger(), "USBCAN device num: %d PCS\n", num);
+    RCLCPP_INFO(this->get_logger(), "USBCAN device num: %d PCS", num);
     if (num < 1)
         return false;
 
     for (int i = 0; i < num; i++)
 	{
-		RCLCPP_INFO(this->get_logger(), "Device: %d \n", i);
-        RCLCPP_INFO(this->get_logger(), "Get VCI_ReadBoardInfo success!\n");
+		RCLCPP_INFO(this->get_logger(), "Device: %d", i);
+        RCLCPP_INFO(this->get_logger(), "Get VCI_ReadBoardInfo success!");
 		
 		RCLCPP_INFO(this->get_logger(), ">>Serial_Num: %s", pInfo1[i].str_Serial_Num);
 
