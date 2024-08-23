@@ -4,9 +4,14 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/qos.hpp"
 
+#include <ament_index_cpp/get_package_prefix.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rcpputils/shared_library.hpp>
+
 #include <algorithm>
 #include <iterator>
 #include <chrono>
+#include <yaml-cpp/yaml.h>
 
 #include "controlcan.h"
 
@@ -26,8 +31,9 @@ public:
     bool find_canusb();
     bool open_canusb();
     bool read_canusb();
-    bool init_canusb();
+    bool init_canusb(const std::string filename);
     bool start_canusb();
+    bool close_canusb();
 
     void can_msg_cb();
     void can_req_cb(const std::shared_ptr<VciCanObjMsg> msg);

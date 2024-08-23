@@ -18,17 +18,18 @@ CanTransceiver::CanTransceiver(rclcpp::NodeOptions options)
         RCLCPP_ERROR(this->get_logger(), "Read USBCAN Error!");
     }
 
-    if (!init_canusb())
+    std::string _filename = "canusb_config.yaml";
+    if (!init_canusb(_filename))
     {
         RCLCPP_ERROR(this->get_logger(), "Init USBCAN Error!");
-        VCI_CloseDevice(VCI_USBCAN2, 0);
+        close_canusb();
         // TODO: exit ...
     }
 
     if (!start_canusb())
     {
         RCLCPP_ERROR(this->get_logger(), "Start USBCAN Error!");
-        VCI_CloseDevice(VCI_USBCAN2, 0);
+        close_canusb();
         // TODO: exit ...
     }
 
@@ -39,7 +40,7 @@ CanTransceiver::CanTransceiver(rclcpp::NodeOptions options)
     can_qos.reliable();
     can_qos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
 
-    pub_can_msg_timer_ = this->create_wall_timer(10ms, std::bind(&CanTransceiver::can_msg_cb, this), pub_cb_group_);
+    pub_can_msg_timer_ = this->create_wall_timer(5ms, std::bind(&CanTransceiver::can_msg_cb, this), pub_cb_group_);
 
     pub_can_msg_ = this->create_publisher<VciCanObjMsg>("can_msg", can_qos);
 
@@ -111,24 +112,52 @@ bool CanTransceiver::read_canusb()
     return true;
 }
 
-bool CanTransceiver::init_canusb()
+bool CanTransceiver::init_canusb(const std::string filename)
 {
-    VCI_INIT_CONFIG config;
-
-	config.AccCode = 0;
-	config.AccMask = 0xFFFFFFFF;
-	config.Filter = 1;
-	config.Timing0 = 0x00;
-	config.Timing1 = 0x1C;
-	config.Mode = 0;	
-	
-	if (VCI_InitCAN(VCI_USBCAN2, 0, 0, &config) == 1)
-	{
-		RCLCPP_INFO(this->get_logger(), "Init CAN1 success\n");
-	}
-    else
+    std::string share_directory, config_file;
+    try 
     {
+        share_directory = ament_index_cpp::get_package_share_directory("can_transceiver");
+        config_file = share_directory + "/config/" + filename;
+        RCLCPP_INFO(this->get_logger(), config_file.c_str());
+    } 
+    catch (ament_index_cpp::PackageNotFoundError & e) 
+    {
+        throw std::runtime_error(e.what());
+    }
+
+    if (config_file.empty())
         return false;
+
+    try 
+    {
+        YAML::Node config_yaml = YAML::LoadFile(config_file);
+
+        VCI_INIT_CONFIG config;
+
+        config.AccCode = config_yaml["acc_code"].as<DWORD>();
+        config.AccMask = config_yaml["acc_mask"].as<DWORD>();
+        config.Filter = config_yaml["filter"].as<UCHAR>();
+        config.Timing0 = config_yaml["timing0"].as<UCHAR>();
+        config.Timing1 = config_yaml["timing1"].as<UCHAR>();
+        config.Mode = config_yaml["mode"].as<UCHAR>();
+        
+        if (VCI_InitCAN(VCI_USBCAN2, 0, 0, &config) == 1)
+        {
+            RCLCPP_INFO(this->get_logger(), "Init CAN1 success\n");
+        }
+        else
+        {
+            return false;
+        }
+    }
+    catch(const YAML::BadFile& e) 
+    {
+        throw std::runtime_error(e.what());
+    } 
+    catch(const YAML::ParserException& e) 
+    {
+        throw std::runtime_error(e.what());
     }
 
     return true;
@@ -144,6 +173,13 @@ bool CanTransceiver::start_canusb()
     {
         return false;
     }
+
+    return true;
+}
+
+bool CanTransceiver::close_canusb()
+{
+    VCI_CloseDevice(VCI_USBCAN2, 0);
 
     return true;
 }
@@ -223,3 +259,4 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
 	}
     
 }
+

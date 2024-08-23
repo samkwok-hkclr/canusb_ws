@@ -1,0 +1,6 @@
+acc_code: 0
+acc_mask: 0xFFFFFFFF
+filter: 1
+timing0: 0x00
+timing1: 0x1C
+mode: 0

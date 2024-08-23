@@ -19,6 +19,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(rclcpp REQUIRED)
+find_package(yaml-cpp REQUIRED)
 find_package(can_interfaces REQUIRED)
 
 if(BUILD_TESTING)
@@ -42,9 +43,10 @@ add_library(transceiver_lib SHARED
             src/can_transceiver.cpp
 )
 target_link_libraries(transceiver_lib)
-target_link_libraries(transceiver_lib ${CAN_DRIVER} pthread)
+target_link_libraries(transceiver_lib ${YAML_CPP_LIBRARIES} ${CAN_DRIVER} pthread)
 ament_target_dependencies(transceiver_lib 
                           rclcpp 
+                          yaml-cpp
                           can_interfaces       
 )
 
