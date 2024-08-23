@@ -260,3 +260,7 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
     
 }
 
+#include "rclcpp_components/register_node_macro.hpp"
+
+RCLCPP_COMPONENTS_REGISTER_NODE(CanTransceiver)
+
