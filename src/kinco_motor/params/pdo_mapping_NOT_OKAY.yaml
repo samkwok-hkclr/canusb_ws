@@ -1,0 +1,69 @@
+kinco_motor_node:
+  ros__parameters: 
+    tpdo1:
+      group_tx1_pdo: 
+      tx1_pdo1: 
+        address: 0x60400010 # Controlword
+        size: 2
+      tx1_pdo2:
+        address: 0x60600008 # Operation Mode
+        size: 1
+      tx1_pdo3:
+        address: 0x60410010 # Statusword
+        size: 2
+      tx1_pdo4: 
+        address: 0x60780010 # Actual Current
+        size: 2
+      # tx1_pdo6: # total size will be larger 8, thus not used
+      # tx1_pdo7: # total size will be larger 8, thus not used
+      # tx1_pdo8: # total size will be larger 8, thus not used
+      tx1_id: 0x180
+      tx1_transmission: 0xFE     # async
+      tx1_inhibit_time: 0x0      # 0ms
+      tx1_event_time: 0xC8       # 200ms
+    tpdo2:
+      group_tx2_pdo:
+      tx2_pdo1:
+        address: 0x60630020 # actual position
+        size: 4
+      tx2_pdo2:
+        address: 0x606C0020 # actual speed
+        size: 4
+      # tx2_pdo3: # total size will be larger 8, thus not used
+      # tx2_pdo4: # total size will be larger 8, thus not used
+      # tx2_pdo5: # total size will be larger 8, thus not used
+      # tx2_pdo6: # total size will be larger 8, thus not used
+      # tx2_pdo7: # total size will be larger 8, thus not used
+      # tx2_pdo8: # total size will be larger 8, thus not used
+      tx2_id: 0x280
+      tx2_transmission: 0xFE     # async
+      tx2_inhibit_time: 0x0      # 0ms
+      tx2_event_time: 0x64       # 100ms 
+    # rpdo1:                    # not used
+    #   group_rx1_pdo:
+    #   rx1_pdo1:
+    #   rx1_pdo2:
+    #   rx1_pdo3:
+    #   rx1_pdo4:
+    #   rx1_pdo5:
+    #   rx1_pdo6:
+    #   rx1_pdo7:
+    #   rx1_pdo8:
+    #   rx1_id:
+    #   rx1_transmission:
+    #   rx1_inhibit_time:
+    #   rx1_event_time:
+    # tpdo2:                    # not used
+    #   group_rx2_pdo:
+    #   rx2_pdo1:
+    #   rx2_pdo2:
+    #   rx2_pdo3:
+    #   rx2_pdo4:
+    #   rx2_pdo5:
+    #   rx2_pdo6:
+    #   rx2_pdo7:
+    #   rx2_pdo8:
+    #   rx2_id:
+    #   rx2_transmission:
+    #   rx2_inhibit_time:
+    #   rx2_event_time:

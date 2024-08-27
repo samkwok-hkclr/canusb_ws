@@ -1,0 +1,8 @@
+uint32 heartbeat_timestamp
+uint16 statusword
+int32 actual_position
+int32 actual_speed
+float32 actual_current
+
+uint8 operation_mode
+uint16 controlword

@@ -1,0 +1,295 @@
+# velocity control
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 4, \
+data:[0x43, 0x01, 0x25, 0x0A, 0x00, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# reset
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x0, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 2, \
+data:[0x81, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# set 1000ms heartbeat
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2B, 0x17, 0x10, 0x0, 0xE8, 0x03, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# mode
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x0, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 2, \
+data:[0x01, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# velocity control
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2F, 0x60, 0x60, 0x0, 0x03, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0xFF, 0x60, 0x0, 0x0, 0x40, 0x06, 0x00], \
+reserved: [0, 0, 0]\
+}"
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2B, 0x40, 0x60, 0x0, 0x0F, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# ZD 
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x704, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x06, 0x20, 0x01, 0x0B, 0xB8, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x701, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x06, 0x20, 0x01, 0x0B, 0xB8, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x701, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x03, 0x20, 0x0, 0x00, 0x01, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x701, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 0, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x03, 0x20, 0x09, 0x00, 0x01, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+# ============================
+
+# testing
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x1A, 0x01, 0x20, 0x00, 0x6C, 0x60], \
+reserved: [0, 0, 0]\
+}"
+
+
+# Set TPDO1 1A0001 to Control Word
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x1A, 0x01, 0x10, 0x0, 0x40, 0x60], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 1A0002 to Work Mode
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x1A, 0x02, 0x08, 0x0, 0x60, 0x60], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 1A0003 to Statusword
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x1A, 0x03, 0x10, 0x00, 0x41, 0x60], \
+reserved: [0, 0, 0]\
+}"
+
+
+# Set TPDO1 1A0004 to Actual Current
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x1A, 0x04, 0x10, 0x00, 0x78, 0x60], \
+reserved: [0, 0, 0]\
+}"
+
+data:[0x23, 0x00, 0x1A, 0x02, 0x20, 0x0, 0x6C, 0x60], \
+
+# Set TPDO1 num
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x23, 0x00, 0x18, 0x01, 0x81, 0x01, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 type ?????????????????
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 5, \
+data:[0x2F, 0x00, 0x18, 0x02, 0xFE, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 block time
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2B, 0x00, 0x18, 0x03, 0x0, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 event time
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2B, 0x00, 0x18, 0x05, 0xC8, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"
+
+# Set TPDO1 Group 
+ros2 topic pub -1 /can_req can_interfaces/msg/VciCanObj \
+"{\
+id: 0x601, \
+time_stamp: 0, \
+time_flag: 0, \
+send_type: 1, \
+remote_flag: 0, \
+extern_flag: 0, \
+data_len: 8, \
+data:[0x2F, 0x00, 0x1A, 0x0, 0x01, 0x0, 0x0, 0x0], \
+reserved: [0, 0, 0]\
+}"

@@ -23,6 +23,8 @@ using VciCanObjMsg = can_interfaces::msg::VciCanObj;
 
 using namespace std::chrono_literals;
 
+#define REC_BUF_LEN 3000
+
 class CanTransceiver : public rclcpp::Node
 {
 public:
@@ -39,19 +41,19 @@ public:
     void can_req_cb(const std::shared_ptr<VciCanObjMsg> msg);
 
 private:
-    const uint16_t rec_buf_len = 3000;
+    const uint16_t rec_buf_len = REC_BUF_LEN;
     const uint8_t can_index = 0;
-    uint16_t can_count = 0;
+    uint16_t can_msg_ind_ = 0;
 
     VCI_BOARD_INFO pInfo1[50];
     VCI_BOARD_INFO pInfo;
-    VCI_CAN_OBJ rec[3000];
+    VCI_CAN_OBJ rec[REC_BUF_LEN];
 
     const std::string can_msg_format = "Index: %05d CAN%d %s ID:0x%03X %s %s DLC:0x%02X Data:0x %s";
 
     std::mutex mutex_;
 
-    std::shared_ptr<rclcpp::CallbackGroup> pub_cb_group_;
+    std::shared_ptr<rclcpp::CallbackGroup> can_msg_cb_group_;
 
     std::shared_ptr<rclcpp::TimerBase> pub_can_msg_timer_;
 

@@ -1,4 +1,4 @@
-#include "rclcpp/rclcpp.hpp"
+
 #include "can_transceiver/can_transceiver.hpp"
 
 int main(int argc, char *argv[])

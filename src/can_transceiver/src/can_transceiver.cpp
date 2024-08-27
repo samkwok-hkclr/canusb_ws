@@ -33,14 +33,14 @@ CanTransceiver::CanTransceiver(rclcpp::NodeOptions options)
         // TODO: exit ...
     }
 
-    pub_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    can_msg_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
-    rclcpp::QoSInitialization can_qos_init = rclcpp::QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_LAST, 10);
+    rclcpp::QoSInitialization can_qos_init = rclcpp::QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_LAST, 128);
     rclcpp::QoS can_qos(can_qos_init);
     can_qos.reliable();
     can_qos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
 
-    pub_can_msg_timer_ = this->create_wall_timer(5ms, std::bind(&CanTransceiver::can_msg_cb, this), pub_cb_group_);
+    pub_can_msg_timer_ = this->create_wall_timer(5ms, std::bind(&CanTransceiver::can_msg_cb, this), can_msg_cb_group_);
 
     pub_can_msg_ = this->create_publisher<VciCanObjMsg>("can_msg", can_qos);
 
@@ -176,8 +176,13 @@ bool CanTransceiver::init_canusb(const std::string config_filename)
             baud_rate = 66.66;
         else if (config.Timing0 == 0x03 && config.Timing1 == 0x6F) 
             baud_rate = 83.33;
-        else
+        
+        const float err_threshold = 1.0;
+        if (abs(baud_rate) < err_threshold)
+        {
+            RCLCPP_ERROR(this->get_logger(), "Baud Rate Error");
             return false;
+        }
 
         RCLCPP_INFO(this->get_logger(), "Baud rate: %.2f Kbps", baud_rate);
         
@@ -227,16 +232,25 @@ void CanTransceiver::can_msg_cb()
 {
     const std::lock_guard<std::mutex> lock(this->mutex_);
 
-    unsigned int rec_len = VCI_Receive(VCI_USBCAN2, 0, can_index, rec, rec_buf_len, 0);
+    unsigned int rec_len = VCI_GetReceiveNum(VCI_USBCAN2, 0, can_index);
     if (rec_len > 0)
     {
-        for(unsigned int i = 0; i < rec_len; i++)
+        unsigned int received_len = VCI_Receive(VCI_USBCAN2, 0, can_index, rec, rec_buf_len, 0);
+
+        for(unsigned int i = 0; i < received_len; i++)
         {
-            std::string extend, remote;
+            std::string extend = "";
+            std::string remote = "";
             if(rec[i].ExternFlag==0) extend="Standard";
             if(rec[i].ExternFlag==1) extend="Extend";
             if(rec[i].RemoteFlag==0) remote="Data";
             if(rec[i].RemoteFlag==1) remote="Remote";
+
+            if (extend.empty() || remote.empty())
+            {
+                RCLCPP_ERROR(this->get_logger(), "Extern Flag or Remote Flag Error!");
+                return;
+            }
 
             VciCanObjMsg msg;
             msg.id = rec[i].ID;
@@ -246,13 +260,22 @@ void CanTransceiver::can_msg_cb()
             msg.remote_flag = rec[i].RemoteFlag;
             msg.extern_flag = rec[i].ExternFlag;
             msg.data_len = rec[i].DataLen;
-            std::copy(std::begin(rec[i].Data), std::begin(rec[i].Data)+rec[i].DataLen, std::begin(msg.data));
-            std::copy(std::begin(rec[i].Reserved), std::begin(rec[i].Reserved)+3, std::begin(msg.reserved));
+
+            for (size_t j = 0; j < rec[i].DataLen; j++)
+                msg.data.push_back(rec[i].Data[j]);
+
+            std::copy(std::begin(rec[i].Reserved), std::begin(rec[i].Reserved) + 3, std::begin(msg.reserved));
 
             pub_can_msg_->publish(msg);
 
             RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
-                can_count++, can_index+1, "RX", rec[i].ID, extend.c_str(), remote.c_str(), rec[i].DataLen, 
+                can_msg_ind_++, 
+                can_index+1, 
+                "RX", 
+                rec[i].ID, 
+                extend.c_str(), 
+                remote.c_str(), 
+                rec[i].DataLen, 
                 [&]() {
                     std::stringstream ss;
                     for (size_t j = 0; j < rec[i].DataLen; j++) {
@@ -275,22 +298,35 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
 	send[0].ExternFlag = msg->extern_flag;
 	send[0].DataLen = msg->data_len;
 
-    std::copy(std::begin(msg->data), std::end(msg->data), std::begin(send[0].Data));
+    std::copy(std::begin(msg->data), std::begin(msg->data) + msg->data_len, std::begin(send[0].Data));
 
     const std::lock_guard<std::mutex> lock(this->mutex_);
     if (VCI_Transmit(VCI_USBCAN2, 0, 0, send, 1) == 1)
 	{
-        std::string extend, remote;
+        std::string extend = "";
+        std::string remote = "";
         if(msg->extern_flag==0) extend="Standard";
         if(msg->extern_flag==1) extend="Extend";
         if(msg->remote_flag==0) remote="Data";
         if(msg->remote_flag==1) remote="Remote";
 
+        if (extend.empty() || remote.empty())
+        {
+            RCLCPP_ERROR(this->get_logger(), "Extern Flag or Remote Flag Error!");
+            return;
+        }
+
         RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
-            can_count++, can_index+1, "TX", send[0].ID, extend.c_str(), remote.c_str(), send[0].DataLen, 
+            can_msg_ind_++, 
+            can_index+1, 
+            "TX", 
+            send[0].ID, 
+            extend.c_str(), 
+            remote.c_str(), 
+            send[0].DataLen, 
             [&]() {
                 std::stringstream ss;
-                for (size_t j = 0; j < send[0].DataLen; j++) {
+                for (size_t j = 0; j < msg->data_len; j++) {
                     ss << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << static_cast<int>(send[0].Data[j]) << " ";
                 }
                 return ss.str();
