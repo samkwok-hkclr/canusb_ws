@@ -285,7 +285,6 @@ void CanTransceiver::can_msg_cb()
                 }().c_str());
         }
     }
-
 }
 
 void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
@@ -332,7 +331,6 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
                 return ss.str();
             }().c_str());
 	}
-    
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
