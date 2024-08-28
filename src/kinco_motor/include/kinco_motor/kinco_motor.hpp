@@ -3,6 +3,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include "std_msgs/msg/u_int8.hpp"
 #include "std_msgs/msg/u_int16.hpp"
 #include "std_msgs/msg/u_int32.hpp"
 
@@ -11,6 +12,7 @@
 
 using std::placeholders::_1;
 
+using UInt8 = std_msgs::msg::UInt8;
 using UInt16 = std_msgs::msg::UInt16;
 using UInt32 = std_msgs::msg::UInt32;
 using VciCanObjMsg = can_interfaces::msg::VciCanObj;
@@ -35,6 +37,7 @@ public:
 
     void set_heartbeat(uint16_t ms);
 
+    void rotate_dir_req_cb(const std::shared_ptr<UInt8> msg);
     void mode_req_cb(const std::shared_ptr<UInt16> msg);
     void speed_req_cb(const std::shared_ptr<UInt16> msg);
     void controlword_req_cb(const std::shared_ptr<UInt16> msg); 
@@ -69,6 +72,7 @@ private:
     std::shared_ptr<rclcpp::TimerBase> pub_motor_state_timer_;
     std::shared_ptr<rclcpp::Publisher<KincoState>> pub_motor_state_;
 
+    std::shared_ptr<rclcpp::Subscription<UInt8>> sub_rotate_dir_req_;
     std::shared_ptr<rclcpp::Subscription<UInt16>> sub_mode_req_;
     std::shared_ptr<rclcpp::Subscription<UInt16>> sub_speed_req_;
     std::shared_ptr<rclcpp::Subscription<UInt16>> sub_controlword_req_;

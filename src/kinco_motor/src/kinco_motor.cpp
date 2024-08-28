@@ -26,6 +26,7 @@ KincoMotor::KincoMotor(rclcpp::NodeOptions options)
     pub_motor_state_timer_ = this->create_wall_timer(500ms, std::bind(&KincoMotor::pub_motor_state, this), motor_state_cb_group_);
     pub_motor_state_ = this->create_publisher<KincoState>("motor_state", 1);
 
+    sub_rotate_dir_req_ = this->create_subscription<UInt8>("rotate_dir_req", 1, std::bind(&KincoMotor::rotate_dir_req_cb, this, _1));
     sub_mode_req_ = this->create_subscription<UInt16>("mode_req", 1, std::bind(&KincoMotor::mode_req_cb, this, _1));
     sub_speed_req_ = this->create_subscription<UInt16>("speed_req", 1, std::bind(&KincoMotor::speed_req_cb, this, _1));
     sub_controlword_req_ = this->create_subscription<UInt16>("controlword_req", 1, std::bind(&KincoMotor::controlword_req_cb, this, _1));
@@ -51,7 +52,7 @@ void KincoMotor::map_tx1()
     can_interfaces::msg::VciCanObj msg;
 
     msg.id = 0x600 + node_id_;
-    msg.send_type = 1;
+    msg.send_type = 0;
     msg.data_len = 8;
     msg.data = {0x23, 0x00, 0x1A, 0x01, 0x10, 0x0, 0x40, 0x60};
     pub_can_msg_->publish(msg);
@@ -114,7 +115,7 @@ void KincoMotor::map_tx2()
     can_interfaces::msg::VciCanObj msg;
 
     msg.id = 0x600 + node_id_;
-    msg.send_type = 1;
+    msg.send_type = 0;
     msg.data_len = 8;
     msg.data = {0x23, 0x01, 0x1A, 0x01, 0x20, 0x0, 0x63, 0x60};
     pub_can_msg_->publish(msg);
@@ -181,7 +182,6 @@ void KincoMotor::can_msg_cb(const std::shared_ptr<VciCanObjMsg> msg)
 
 void KincoMotor::handle_tx1_pdo(const std::shared_ptr<VciCanObjMsg> msg)
 {
-    // RCLCPP_INFO(this->get_logger(), "handle_tx1_pdo");
     const std::lock_guard<std::mutex> lock(this->mutex_);
 
     motor_state_.controlword = (static_cast<uint16_t>(msg->data[1]) << 8) |
@@ -195,7 +195,7 @@ void KincoMotor::handle_tx1_pdo(const std::shared_ptr<VciCanObjMsg> msg)
     uint16_t i_DEC = (static_cast<uint16_t>(msg->data[6]) << 8) |
                      (static_cast<uint16_t>(msg->data[5]));
     
-    if (i_DEC > 0xFFF0)
+    if (i_DEC > 0xFF00)
         motor_state_.actual_current = 0.0;
     else
     {
@@ -206,7 +206,6 @@ void KincoMotor::handle_tx1_pdo(const std::shared_ptr<VciCanObjMsg> msg)
 
 void KincoMotor::handle_tx2_pdo(const std::shared_ptr<VciCanObjMsg> msg)
 {
-    
     int32_t speed_DEC = (static_cast<uint32_t>(msg->data[7]) << 24) |
                         (static_cast<uint32_t>(msg->data[6]) << 16) |
                         (static_cast<uint32_t>(msg->data[5]) << 8) |
@@ -217,7 +216,7 @@ void KincoMotor::handle_tx2_pdo(const std::shared_ptr<VciCanObjMsg> msg)
 
     motor_state_.actual_position = (static_cast<uint32_t>(msg->data[3]) << 24) |
                                    (static_cast<uint32_t>(msg->data[2]) << 16) |
-                                   (static_cast<uint32_t>(msg->data[1]) << 8) |
+                                   (s   tatic_cast<uint32_t>(msg->data[1]) << 8) |
                                    (static_cast<uint32_t>(msg->data[0]));
 }
 
@@ -233,7 +232,7 @@ void KincoMotor::set_heartbeat(uint16_t ms)
     can_interfaces::msg::VciCanObj can_msg;
 
     can_msg.id = 0x600 + node_id_;
-    can_msg.send_type = 1;
+    can_msg.send_type = 0;
     can_msg.data_len = 6;
     can_msg.data = {0x2B, 0x17, 0x10, 0x00, static_cast<uint8_t>(ms & 0xFF), 
                                             static_cast<uint8_t>((ms >> 8) & 0xFF)};
@@ -241,12 +240,23 @@ void KincoMotor::set_heartbeat(uint16_t ms)
     RCLCPP_INFO(this->get_logger(), "Set heartbeat to %d ms", ms);
 }
 
+void KincoMotor::rotate_dir_req_cb(const std::shared_ptr<UInt8> msg)
+{
+    can_interfaces::msg::VciCanObj can_msg;
+
+    can_msg.id = 0x600 + node_id_;
+    can_msg.send_type = 0;
+    can_msg.data_len = 5;
+    can_msg.data = {0x2F, 0x7E, 0x60, 0x00, static_cast<uint8_t>(msg->data == 0 ? 0x0 : 0x01)};
+    pub_can_msg_->publish(can_msg);
+}
+
 void KincoMotor::mode_req_cb(const std::shared_ptr<UInt16> msg)
 {
     can_interfaces::msg::VciCanObj can_msg;
 
     can_msg.id = 0x600 + node_id_;
-    can_msg.send_type = 1;
+    can_msg.send_type = 0;
     can_msg.data_len = 6;
     can_msg.data = {0x2F, 0x60, 0x60, 0x00, static_cast<uint8_t>(msg->data & 0xFF), 
                                             static_cast<uint8_t>((msg->data >> 8) & 0xFF)};
@@ -260,7 +270,7 @@ void KincoMotor::speed_req_cb(const std::shared_ptr<UInt16> msg)
     can_interfaces::msg::VciCanObj can_msg;
 
     can_msg.id = 0x600 + node_id_;
-    can_msg.send_type = 1;
+    can_msg.send_type = 0;
     can_msg.data_len = 8;
     can_msg.data = {0x23, 0xFF, 0x60, 0x00, static_cast<uint8_t>(speed_DEC & 0xFF), 
                                             static_cast<uint8_t>((speed_DEC >> 8) & 0xFF), 
@@ -274,7 +284,7 @@ void KincoMotor::controlword_req_cb(const std::shared_ptr<UInt16> msg)
     can_interfaces::msg::VciCanObj can_msg;
 
     can_msg.id = 0x600 + node_id_;
-    can_msg.send_type = 1;
+    can_msg.send_type = 0;
     can_msg.data_len = 6;
     can_msg.data = {0x2B, 0x40, 0x60, 0x00, static_cast<uint8_t>(msg->data & 0xFF), 
                                             static_cast<uint8_t>((msg->data >> 8) & 0xFF)};
