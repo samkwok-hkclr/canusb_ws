@@ -22,15 +22,15 @@ ENV ROS_DISTRO=humble
 RUN apt install -y ros-${ROS_DISTRO}-ros-base
 
 RUN apt install -y build-essential cmake git wget dos2unix \
-    python3-colcon-common-extensions python3-pip python3-rosdep python3-vcstool
-# RUN pip3 install fastapi uvicorn
-
-# EXPOSE 18000-18100
+    python3-colcon-common-extensions python3-pip python3-rosdep python3-vcstool \
+    ros-${ROS_DISTRO}-rosbridge-server
+    
+EXPOSE 8080, 9090
 
 FROM dev_img AS kinco_prod_img
 
-RUN mkdir -p /plc_ws/src
-WORKDIR /plc_ws
+RUN mkdir -p /my_ws/src
+WORKDIR /my_ws
 COPY ./src ./src
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
     # && rosdep init \
