@@ -268,7 +268,7 @@ void CanTransceiver::can_msg_cb()
 
             pub_can_msg_->publish(msg);
 
-            RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
+            RCLCPP_DEBUG(this->get_logger(), can_msg_format.c_str(),
                 can_msg_ind_++, 
                 can_index+1, 
                 "RX", 
@@ -315,7 +315,7 @@ void CanTransceiver::can_req_cb(const std::shared_ptr<VciCanObjMsg> msg)
             return;
         }
 
-        RCLCPP_INFO(this->get_logger(), can_msg_format.c_str(),
+        RCLCPP_DEBUG(this->get_logger(), can_msg_format.c_str(),
             can_msg_ind_++, 
             can_index+1, 
             "TX", 

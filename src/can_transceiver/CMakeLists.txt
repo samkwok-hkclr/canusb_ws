@@ -76,8 +76,8 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
-install(DIRECTORY 
-  lib
+install(FILES 
+  lib/libcontrolcan.so
   DESTINATION lib
 )
 

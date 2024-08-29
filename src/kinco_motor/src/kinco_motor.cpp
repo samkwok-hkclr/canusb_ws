@@ -26,7 +26,7 @@ KincoMotor::KincoMotor(rclcpp::NodeOptions options)
     pub_motor_state_timer_ = this->create_wall_timer(500ms, std::bind(&KincoMotor::pub_motor_state, this), motor_state_cb_group_);
     pub_motor_state_ = this->create_publisher<KincoState>("motor_state", 1);
     
-    sub_mode_req_ = this->create_subscription<UInt16>("mode_req", 1, std::bind(&KincoMotor::mode_req_cb, this, _1));
+    sub_mode_req_ = this->create_subscription<Int8>("mode_req", 1, std::bind(&KincoMotor::mode_req_cb, this, _1));
     sub_controlword_req_ = this->create_subscription<UInt16>("controlword_req", 1, std::bind(&KincoMotor::controlword_req_cb, this, _1));
 
     sub_rotate_dir_req_ = this->create_subscription<UInt8>("rotate_dir_req", 1, std::bind(&KincoMotor::rotate_dir_req_cb, this, _1));
@@ -240,14 +240,13 @@ void KincoMotor::set_heartbeat(uint16_t ms)
     RCLCPP_INFO(this->get_logger(), "Set heartbeat to %d ms", ms);
 }
 
-void KincoMotor::mode_req_cb(const std::shared_ptr<UInt16> msg)
+void KincoMotor::mode_req_cb(const std::shared_ptr<Int8> msg)
 {
     VciCanObjMsg can_msg;
 
     can_msg.id = 0x600 + node_id_;
-    can_msg.data_len = 6;
-    can_msg.data = {0x2F, 0x60, 0x60, 0x00, static_cast<uint8_t>(msg->data & 0xFF), 
-                                            static_cast<uint8_t>((msg->data >> 8) & 0xFF)};
+    can_msg.data_len = 5;
+    can_msg.data = {0x2F, 0x60, 0x60, 0x00, static_cast<uint8_t>(msg->data & 0xFF)};
     pub_can_req_->publish(can_msg);
 }
 
