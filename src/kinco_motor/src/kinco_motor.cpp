@@ -284,6 +284,13 @@ void KincoMotor::speed_req_cb(const std::shared_ptr<UInt16> msg)
                                             static_cast<uint8_t>((speed_DEC >> 16) & 0xFF), 
                                             static_cast<uint8_t>((speed_DEC >> 24) & 0xFF)};
     pub_can_req_->publish(can_msg);
+    
+    can_msg.data.clear();
+    can_msg.data = {0x23, 0x81, 0x60, 0x00, static_cast<uint8_t>(speed_DEC & 0xFF), 
+                                            static_cast<uint8_t>((speed_DEC >> 8) & 0xFF), 
+                                            static_cast<uint8_t>((speed_DEC >> 16) & 0xFF), 
+                                            static_cast<uint8_t>((speed_DEC >> 24) & 0xFF)};
+    pub_can_req_->publish(can_msg);
 }
 
 void KincoMotor::target_pos_req_cb(const std::shared_ptr<Int32> msg)

@@ -93,6 +93,7 @@ private:
 
     std::shared_ptr<rclcpp::Subscription<Int32>> sub_target_pos_req_;
     std::shared_ptr<rclcpp::Subscription<UInt32>> sub_profile_speed_req_;
+
 };
 
 #endif
