@@ -1,0 +1,63 @@
+options:
+  dcf_path: "@BUS_CONFIG_PATH@"
+
+master:
+  node_id: 1
+  driver: "ros2_canopen::MasterDriver"
+  package: "canopen_master_driver"
+  sync_period: 1000000 # 1 sec
+
+defaults:
+  heartbeat_producer: 1000
+  period: 1000000 # This number must be the same with master:sync_period
+  revision_number: 0
+
+nodes:
+  kinco_device_1:
+    node_id: 2
+    dcf: "FD_EDS_20240802_HKCLR.eds" # The original EDS file has error, modified by HKCLR
+    driver: "ros2_canopen::Cia402Driver"
+    package: "canopen_402_driver"
+    sdo:
+      - {index: 0x6040, sub_index: 0, value: 0x86} # Controlword, clear error
+      - {index: 0x6040, sub_index: 0, value: 0x6} # Controlword, disable
+      - {index: 0x607A, sub_index: 0, value: 0x0} # Target position
+      - {index: 0x6081, sub_index: 0, value: 0x0} # Profile velocity
+      - {index: 0x60FF, sub_index: 0, value: 0x0} # Target velocity
+    tpdo:
+      1:
+        enabled: true
+        cob_id: "auto"
+        transmission: 0x1
+        # inhibit_time: 0x0
+        # event_timer: 0x1F4
+        mapping:
+          - {index: 0x6040, sub_index: 0} # Controlword 
+          - {index: 0x6060, sub_index: 0} # Operation Mode
+          - {index: 0x6041, sub_index: 0} # Statusword 
+          - {index: 0x6078, sub_index: 0} # Actual Current
+      2:
+        enabled: true
+        cob_id: "auto"
+        transmission: 0x1
+        # inhibit_time: 0x0
+        # event_timer: 0x1F4
+        mapping:
+          - {index: 0x6063, sub_index: 0} # Actual Position
+          - {index: 0x606C, sub_index: 0} # Actual Rotate Speed
+    rpdo: # RPDO needed controlword, target position, target velocity, mode of operation
+      1:
+        enabled: true
+        cob_id: "auto"
+        mapping:
+        - {index: 0x6040, sub_index: 0} # Controlword
+        - {index: 0x6060, sub_index: 0} # Operation Mode
+        - {index: 0x60FF, sub_index: 0} # Target velocity
+      2:
+        enabled: true
+        cob_id: "auto"
+        mapping:
+        - {index: 0x607A, sub_index: 0} # Target position
+        - {index: 0x6081, sub_index: 0} # Profile velocity
+  # cia402_device_2:
+  #   node_id: 3
