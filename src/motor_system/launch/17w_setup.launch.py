@@ -21,24 +21,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    slave_eds_path = os.path.join(
-        get_package_share_directory("motor_system"), "config", "17w", "FD_EDS_20240802_HKCLR.eds"
-    )
-
-    slave_node_1 = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [
-                os.path.join(get_package_share_directory("motor_system"), "launch"),
-                "/cia402_slave.launch.py",
-            ]
-        ),
-        launch_arguments={
-            "node_id": "2",
-            "node_name": "kinco_node_1",
-            "slave_config": slave_eds_path,
-            "can_interface_name": "can0",
-        }.items(),
-    )
+    ld = LaunchDescription()
 
     master_bin_path = os.path.join(
         get_package_share_directory("motor_system"),
@@ -74,4 +57,6 @@ def generate_launch_description():
         }.items(),
     )
 
-    return LaunchDescription([slave_node_1, device_container])
+    ld.add_action(device_container)
+    
+    return ld
