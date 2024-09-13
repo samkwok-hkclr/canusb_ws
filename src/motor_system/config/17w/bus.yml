@@ -2,7 +2,7 @@ options:
   dcf_path: "@BUS_CONFIG_PATH@"
 
 master:
-  node_id: 3
+  node_id: 127
   driver: "ros2_canopen::MasterDriver"
   package: "canopen_master_driver"
   baud_rate: 500
