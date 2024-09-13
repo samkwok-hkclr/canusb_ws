@@ -8,7 +8,7 @@ master:
   baud_rate: 500
   heartbeat_consumer: true
   heartbeat_producer: 1000
-  sync_period: 100000
+  sync_period: 100000 # 100ms
 
 defaults:
   heartbeat_consumer: true

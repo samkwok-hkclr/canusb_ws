@@ -35,11 +35,12 @@ FROM dev_img AS kinco_prod_img
 RUN mkdir -p /my_ws/src
 WORKDIR /my_ws
 COPY ./src ./src
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh
+RUN rosdep install --from-paths src/ros2_canopen --ignore-src -r -y
+RUN colcon build
     # && rosdep init \
     # && rosdep update \
     # && rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} \
-    && colcon build
 
 RUN mkdir -p /logs
 ENV ROS_LOG_DIR=/logs
